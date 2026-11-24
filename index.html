@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Quest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-left">
+      <div id="hearts"></div>
+      <div id="stars"></div>
+    </div>
+    <div id="objective"></div>
+    <div class="hud-right">
+      <button id="btn-save" title="Save game (P)">&#128190;</button>
+      <button id="btn-book" title="Sticker Book (B)">&#128214;</button>
+      <button id="btn-mute" title="Sound (M)">&#128266;</button>
+    </div>
+    <div class="controls-hint">WASD move &middot; Space jump (x2) &middot; Shift dash &middot; E talk &middot; drag mouse / Q R to look &middot; B stickers</div>
+  </div>
+  <div id="prompt"></div>
+  <div id="toast"></div>
+  <div id="banner"></div>
+  <div id="bossbar" class="hidden"><div id="boss-name"></div><div class="boss-track"><div id="boss-fill"></div></div></div>
+
+  <!-- Dialogue -->
+  <div id="dialogue" class="hidden">
+    <div id="dlg-portrait"></div>
+    <div class="dlg-body">
+      <div id="dlg-name"></div>
+      <div id="dlg-text"></div>
+      <div id="dlg-next">&#9660;</div>
+    </div>
+  </div>
+
+  <!-- Choice menu (used by the lesson rewatch list) -->
+  <div id="choice" class="overlay hidden">
+    <div class="choice-box">
+      <div id="choice-title"></div>
+      <div id="choice-q"></div>
+      <div id="choice-opts"></div>
+    </div>
+  </div>
+
+  <!-- Theater -->
+  <div id="theater" class="overlay hidden">
+    <div class="theater-room">
+      <div class="th-head">
+        <div class="th-label">&#128250; Lesson Time</div>
+        <div id="th-world"></div>
+      </div>
+      <div id="th-tabs"></div>
+      <div class="tv">
+        <div class="antenna l"></div><div class="antenna r"></div>
+        <div class="tv-screen">
+          <div id="th-screen-inner"></div>
+          <div id="th-fallback" class="hidden"></div>
+        </div>
+        <div class="tv-side"><span class="knob"></span><span class="knob"></span><span class="grill"></span></div>
+      </div>
+      <div id="th-title"></div>
+      <div id="th-credit" class="th-credit"></div>
+      <div class="th-bottom">
+        <div id="th-couch"></div>
+        <div class="th-progress">
+          <div class="bar"><div id="th-fill"></div></div>
+          <div id="th-pct"></div>
+          <div class="th-buttons">
+            <button id="th-back" class="btn ghost">&#9664; Back</button>
+            <button id="th-skip" class="btn ghost">Skip video &#9197;</button>
+            <button id="th-play" class="btn" disabled>&#128274; Play Level</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticker book -->
+  <div id="book" class="overlay hidden">
+    <div class="book-box">
+      <div class="book-head"><h2>&#128214; <span id="book-owner"></span>'s Sticker Book</h2><button id="book-close" class="btn ghost">Close</button></div>
+      <p class="book-sub">Every sticker is a cheat sheet for something you learned.</p>
+      <div id="book-cards"></div>
+      <p class="book-credit">Lessons summarized from the <b>Master The Claude Ecosystem</b> videos by <a href="https://www.youtube.com/@futurepedia_io" target="_blank" rel="noopener">Futurepedia</a> on YouTube. All video content belongs to its creator.</p>
+    </div>
+  </div>
+
+  <!-- Save menu -->
+  <div id="saves" class="overlay hidden">
+    <div class="book-box saves-box">
+      <div class="book-head"><h2>&#128190; Saved Games</h2><button id="saves-close" class="btn ghost">Close</button></div>
+      <p class="book-sub">The game also saves by itself. Loading a world starts it from its beginning.</p>
+      <div id="saves-list"></div>
+      <div class="saves-files">
+        <button id="saves-export" class="btn ghost">Download backup</button>
+        <button id="saves-import" class="btn ghost">Load backup</button>
+        <input id="saves-file" type="file" accept=".json,application/json" hidden>
+      </div>
+      <div id="saves-msg" role="status"></div>
+    </div>
+  </div>
+
+  <!-- Ending + credits -->
+  <div id="ending" class="overlay hidden">
+    <div class="book-box end-credits">
+      <h2>&#127881; The End! &#127881;</h2>
+      <p><b id="end-name"></b>, you cleared the fog from all of Promptopia and turned the Vague King into the Clear King!</p>
+      <p>You learned Chat, models &amp; effort, prompting, connectors, projects, skills, Cowork and Claude Code. Now go build something real! &#10024;</p>
+      <h3>Credits</h3>
+      <p>&#127916; <b>Every video lesson in this game is by <a href="https://www.youtube.com/@futurepedia_io" target="_blank" rel="noopener">Futurepedia</a></b>, from the YouTube playlist <a href="https://www.youtube.com/playlist?list=PLampfBinA-FI" target="_blank" rel="noopener">&ldquo;Master The Claude Ecosystem&rdquo;</a>. The videos and their content belong to their creator. This game only plays them through YouTube and builds lessons around them. Please go watch, like and subscribe!</p>
+      <p>Game: <b>Claude Quest</b>, a fan-made learning adventure.</p>
+      <button id="end-close" class="btn big">Back to Promptopia &#9654;</button>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div id="title" class="hidden">
+    <div class="title-card">
+      <div class="title-small">a cute little adventure about learning Claude</div>
+      <h1><span>Claude</span> Quest</h1>
+      <div class="title-btns">
+        <button id="btn-continue" class="btn big">Continue</button>
+        <button id="btn-start" class="btn big alt">Start Adventure</button>
+        <button id="btn-load" class="btn ghost">&#128190; Load Game</button>
+      </div>
+      <div class="title-note">Best with sound on &#128266; &middot; Each world starts with a video lesson</div>
+      <div class="credit-note">All video lessons are by <a href="https://www.youtube.com/@futurepedia_io" target="_blank" rel="noopener"><b>Futurepedia</b></a>, from the YouTube playlist <a href="https://www.youtube.com/playlist?list=PLampfBinA-FI" target="_blank" rel="noopener">&ldquo;Master The Claude Ecosystem&rdquo;</a>. The videos belong to their creator. This fan-made game just plays them and builds lessons around them. Go subscribe! &#10084;</div>
+    </div>
+  </div>
+
+  <!-- Name entry -->
+  <div id="name-entry" class="overlay hidden">
+    <form class="name-box" id="name-form" autocomplete="off">
+      <div class="name-sparky" id="name-sparky"></div>
+      <h2>Who are you, adventurer?</h2>
+      <p>Select your character and tell Sparky your name!</p>
+      <div class="avatar-title">Select character</div>
+      <div class="avatar-pick">
+        <button type="button" class="avatar-opt" data-avatar="female" aria-label="Character 1"><span class="avatar-face" id="avatar-female"></span></button>
+        <button type="button" class="avatar-opt" data-avatar="male" aria-label="Character 2"><span class="avatar-face" id="avatar-male"></span></button>
+      </div>
+      <input id="name-input" type="text" maxlength="14" placeholder="Type your name..." spellcheck="false">
+      <div id="name-error" class="name-error"></div>
+      <div class="name-btns">
+        <button type="button" id="name-back" class="btn ghost">&#9664; Back</button>
+        <button type="submit" class="btn">Let's go! &#10024;</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="flash"></div>
+  <div id="fade" class="on"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
